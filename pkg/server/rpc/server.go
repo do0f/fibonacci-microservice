@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"fibonacci_service/pkg/rpc"
 	"fibonacci_service/pkg/server"
 	"fmt"
 	"net"
@@ -10,7 +11,7 @@ import (
 
 type Server struct {
 	s *grpc.Server
-	UnimplementedFibonacciServer
+	rpc.UnimplementedFibonacciServer
 
 	svc server.FibService
 }
@@ -21,7 +22,7 @@ func New(service server.FibService) *Server {
 	serv.svc = service
 
 	serv.s = grpc.NewServer()
-	RegisterFibonacciServer(serv.s, serv)
+	rpc.RegisterFibonacciServer(serv.s, serv)
 	return serv
 }
 

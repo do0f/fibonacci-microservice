@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	address  = "localhost:6379"
+	address  = "cache:6379"
 	password = ""
 	db       = 0
 )
