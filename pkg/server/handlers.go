@@ -27,7 +27,7 @@ type errorResponse struct {
 	Message string `json:"message"`
 }
 
-func (serv *Server) getFibonacci(ctx echo.Context) error {
+func (serv *Server) GetFibonacci(ctx echo.Context) error {
 	reqData := &fibbonaciReqData{}
 	err := ctx.Bind(reqData)
 	if err != nil {
@@ -43,7 +43,7 @@ func (serv *Server) getFibonacci(ctx echo.Context) error {
 
 	sequence, err := serv.svc.FibSequence(reqData.First, reqData.Last)
 	if err != nil {
-		serv.e.Logger.Error(err)
+		serv.Logger.Error(err)
 		return ctx.JSON(http.StatusInternalServerError, errorResponse{"interval error"})
 	}
 

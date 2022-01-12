@@ -11,26 +11,25 @@ const (
 	GetFibbonaciEndpoint = "/fibonacci"
 )
 
-type IFibService interface {
+type FibService interface {
 	FibSequence(first int, last int) ([]service.FibNumber, error)
 }
 
 type Server struct {
-	e   *echo.Echo
-	svc IFibService
+	*echo.Echo
+	svc FibService
 }
 
-func New(service IFibService) *Server {
-	serv := &Server{
-		e:   echo.New(),
-		svc: service,
-	}
+func New(service FibService) *Server {
+	serv := new(Server)
+	serv.Echo = echo.New()
+	serv.svc = service
 
-	serv.e.GET(GetFibbonaciEndpoint, serv.getFibonacci)
+	serv.GET(GetFibbonaciEndpoint, serv.GetFibonacci)
 
 	return serv
 }
 
 func (serv *Server) Start(port int) error {
-	return serv.e.Start(fmt.Sprintf(":%d", port))
+	return serv.Echo.Start(fmt.Sprintf(":%d", port))
 }

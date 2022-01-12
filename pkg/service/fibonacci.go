@@ -7,19 +7,21 @@ import (
 )
 
 var (
-	ErrNegativeCount = errors.New("fibonacci numbers count should start with 0")
+	ErrFirstLargerThanLast = errors.New("first is larger that last")
+	ErrNegativeCount       = errors.New("fibonacci numbers count should start with 0")
+	ErrCacheError          = errors.New("internal error while using cache")
 )
 
-type ICache interface {
+type Cache interface {
 	GetFibonacci(count int) (cache.FibNumber, error)
 	SetFibonacci(num cache.FibNumber) error
 }
 
 type FibService struct {
-	c ICache
+	c Cache
 }
 
-func New(cache ICache) *FibService {
+func New(cache Cache) *FibService {
 	return &FibService{
 		c: cache,
 	}
@@ -45,7 +47,7 @@ func (fs *FibService) getFib(count int) (FibNumber, error) {
 	}
 	//cache error
 	if err != cache.ErrKeyDoesntExist {
-		return FibNumber{}, err
+		return FibNumber{}, ErrCacheError
 	}
 
 	//number was not in cache
@@ -67,6 +69,10 @@ func (fs *FibService) getFib(count int) (FibNumber, error) {
 }
 
 func (fs *FibService) FibSequence(first int, last int) ([]FibNumber, error) {
+	if first > last {
+		return nil, ErrFirstLargerThanLast
+	}
+
 	sequence := make([]FibNumber, last-first+1)
 
 	for i := 0; i < last-first+1; i++ {
