@@ -1,4 +1,4 @@
-package server
+package rest
 
 import (
 	"fibonacci_service/pkg/service"
@@ -22,14 +22,15 @@ type Server struct {
 
 func New(service FibService) *Server {
 	serv := new(Server)
+
 	serv.Echo = echo.New()
 	serv.svc = service
 
-	serv.GET(GetFibbonaciEndpoint, serv.GetFibonacci)
+	serv.GET(GetFibbonaciEndpoint, serv.GetFibonacciHandler)
 
 	return serv
 }
 
-func (serv *Server) Start(port int) error {
+func (serv *Server) StartRest(port int) error {
 	return serv.Echo.Start(fmt.Sprintf(":%d", port))
 }

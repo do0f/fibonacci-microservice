@@ -1,0 +1,18 @@
+syntax = "proto3";
+package fibonacci;
+
+option go_package = "/rpc";
+
+service Fibonacci {
+    rpc GetFibonacci(FibonacciSequenceRequest) returns (FibonacciSequenceResponse);
+}
+
+message FibonacciSequenceRequest {
+    int64 First = 1;
+    int64 Last = 2;
+}
+
+message FibonacciSequenceResponse {
+    repeated string Number = 1;
+    string Error = 2;
+}

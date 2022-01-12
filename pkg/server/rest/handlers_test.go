@@ -1,8 +1,8 @@
-package server_test
+package rest_test
 
 import (
-	"fibonacci_service/pkg/server"
 	fib_service_mock "fibonacci_service/pkg/server/mocks"
+	server "fibonacci_service/pkg/server/rest"
 	"fibonacci_service/pkg/service"
 	"math/big"
 	"net/http"
@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHandlers_GetFibonacci(t *testing.T) {
+func TestHandlers_GetFibonacciHandler(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
@@ -29,7 +29,7 @@ func TestHandlers_GetFibonacci(t *testing.T) {
 	mockService.EXPECT().FibSequence(6, 7).Return(nil, service.ErrCacheError).Times(1)
 
 	serv := server.New(mockService)
-	go serv.Start(1324)
+	go serv.StartRest(1324)
 
 	type input struct {
 		first string
@@ -64,7 +64,7 @@ func TestHandlers_GetFibonacci(t *testing.T) {
 		ctx.SetPath(server.GetFibbonaciEndpoint)
 
 		t.Run(test.name, func(t *testing.T) {
-			if assert.NoError(t, serv.GetFibonacci(ctx)) {
+			if assert.NoError(t, serv.GetFibonacciHandler(ctx)) {
 				assert.Equal(t, test.expectedCode, recorder.Code)
 			}
 		})

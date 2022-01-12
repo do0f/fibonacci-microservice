@@ -2,7 +2,8 @@ package main
 
 import (
 	"fibonacci_service/pkg/cache"
-	"fibonacci_service/pkg/server"
+	"fibonacci_service/pkg/server/rest"
+	"fibonacci_service/pkg/server/rpc"
 	"fibonacci_service/pkg/service"
 	"log"
 )
@@ -10,9 +11,18 @@ import (
 func main() {
 	c := cache.New()
 	svc := service.New(c)
-	serv := server.New(svc)
+	restServ := rest.New(svc)
 
-	if err := serv.Start(1323); err != nil {
-		log.Fatal(err.Error())
-	}
+	go func() {
+		log.Fatal(restServ.StartRest(1323))
+	}()
+
+	rpcServ := rpc.New(svc)
+
+	go func() {
+		log.Fatal(rpcServ.StartRpc(9000))
+	}()
+
+	wait := make(chan chan bool)
+	<-wait
 }
