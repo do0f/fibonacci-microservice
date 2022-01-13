@@ -12,5 +12,6 @@ services:
     command:  ./fibonacci
     ports:
       - 1323:1323
+      - 9000:9000
     depends_on:
       - cache
