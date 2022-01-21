@@ -40,6 +40,10 @@ func Connect(address string, password string, db int) (*Cache, error) {
 	return c, nil
 }
 
+func (c *Cache) GracefulShutdown() error {
+	return c.c.Close()
+}
+
 func (c *Cache) GetFibonacci(count int) (FibNumber, error) {
 	strVal, err := c.c.Get(context.Background(), strconv.Itoa(count)).Result()
 	if err != nil {

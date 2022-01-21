@@ -37,7 +37,7 @@ func (serv *Server) GetFibonacciHandler(ctx echo.Context) error {
 
 	sequence, err := serv.svc.FibSequence(reqData.First, reqData.Last)
 	if err != nil {
-		serv.Logger.Error(err)
+		serv.e.Logger.Error(err)
 		return ctx.JSON(http.StatusInternalServerError, errorResponse{"interval error"})
 	}
 

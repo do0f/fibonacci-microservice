@@ -1,12 +1,15 @@
 package main
 
 import (
+	"context"
 	"fibonacci_service/pkg/cache"
 	"fibonacci_service/pkg/server/rest"
 	"fibonacci_service/pkg/server/rpc"
 	"fibonacci_service/pkg/service"
 	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
 
 	"log"
 )
@@ -49,6 +52,25 @@ func main() {
 		log.Fatal(rpcServ.StartRpc(grpcPort))
 	}()
 
-	wait := make(chan chan bool)
-	<-wait
+	//graceful shutdown
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+	<-quit
+
+	log.Printf("attempting graceful shutdown")
+
+	err = c.GracefulShutdown()
+	if err != nil {
+		log.Printf("failed to gracefully shutdown redis cache: %s", err.Error())
+	}
+	log.Printf("cache shutted down")
+
+	rpcServ.GracefulShutdown()
+	log.Printf("rpc server shutted down")
+
+	err = restServ.GracefulShutdown(context.Background())
+	if err != nil {
+		log.Printf("failed to gracefully shutdown rest server: %s", err.Error())
+	}
+	log.Printf("rest server shutted down")
 }
