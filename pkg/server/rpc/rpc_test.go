@@ -9,6 +9,7 @@ import (
 	"log"
 	"math/big"
 	"testing"
+	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -30,7 +31,15 @@ func TestServer_GetFibonacci(t *testing.T) {
 	mockService.EXPECT().FibSequence(6, 7).Return(nil, service.ErrCacheError).Times(1)
 
 	serv := server.New(mockService)
-	go serv.StartRpc(9001)
+
+	go func() {
+		err := serv.StartRpc(9001)
+		if err != nil {
+			assert.Fail(t, "server failed to start")
+		}
+	}()
+
+	time.Sleep(1 * time.Second)
 
 	type input struct {
 		first int64
@@ -62,7 +71,7 @@ func TestServer_GetFibonacci(t *testing.T) {
 				Last:  test.testInput.last,
 			})
 
-			assert.Equal(t, err, nil)
+			assert.Equal(t, err, nil, "error not nil %v", err)
 			assert.Equal(t, res.Error != "", test.expectedError)
 		})
 	}
