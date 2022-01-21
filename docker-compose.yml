@@ -5,13 +5,20 @@ services:
     restart: always
     image: redis
     ports:
-      - 6379:6379
+      - ${REDIS_PORT}:${REDIS_PORT}
+    command: --requirepass ${REDIS_PASSWORD}
 
   fibonacci:
     build: ./
     command:  ./fibonacci
+    environment:
+      - CACHE_ADDRESS=cache:${REDIS_PORT}
+      - CACHE_PASSWORD=${REDIS_PASSWORD}
+      - CACHE_DB_NUM=0
+      - REST_PORT=${REST_PORT}
+      - GRPC_PORT=${GRPC_PORT}
     ports:
-      - 1323:1323
-      - 9000:9000
+      - ${REST_PORT}:${REST_PORT}
+      - ${GRPC_PORT}:${GRPC_PORT}
     depends_on:
       - cache
