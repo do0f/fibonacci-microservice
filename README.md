@@ -5,9 +5,7 @@ REST API and gRPC microservice for getting fibonacci numbers sequence
 
 Вычисленные числа кэшируются в Redis.
 
-REST API работает на порте 1323,
-gRPC сервер работает на порте 9000.
-
+Данные для подключения к сервису задаются в .env файле (Порты серверов, пароль от БД)
 Развертка сервиса выполняется с помощью docker-compose
 
 Команды:
