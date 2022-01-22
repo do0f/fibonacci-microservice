@@ -45,6 +45,8 @@ func TestServer_GetFibonacci(t *testing.T) {
 
 		{name: "negative count", testInput: input{first: -5, last: 4}, expectedError: true},
 
+		{name: "first larger than last", testInput: input{first: 8, last: 1}, expectedError: true},
+
 		{name: "internal error", testInput: input{first: 6, last: 7}, expectedError: true},
 	}
 
