@@ -9,12 +9,6 @@ import (
 	redis "github.com/go-redis/redis/v8"
 )
 
-const (
-	address  = "cache:6379"
-	password = ""
-	db       = 0
-)
-
 var (
 	ErrKeyDoesntExist = errors.New("key doesnt exist")
 	ErrParsingValue   = errors.New("error parsing value")
@@ -29,14 +23,25 @@ type Cache struct {
 	c *redis.Client
 }
 
-func New() *Cache {
-	return &Cache{
+func Connect(address string, password string, db int) (*Cache, error) {
+	c := &Cache{
 		c: redis.NewClient(&redis.Options{
 			Addr:     address,
 			Password: password,
 			DB:       db,
 		}),
 	}
+
+	_, err := c.c.Ping(context.Background()).Result()
+	if err != nil { // did not connect successfully
+		return nil, err
+	}
+
+	return c, nil
+}
+
+func (c *Cache) GracefulShutdown() error {
+	return c.c.Close()
 }
 
 func (c *Cache) GetFibonacci(count int) (FibNumber, error) {

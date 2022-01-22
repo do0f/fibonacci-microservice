@@ -34,3 +34,7 @@ func (serv *Server) StartRpc(port int) error {
 
 	return serv.s.Serve(lis)
 }
+
+func (serv *Server) GracefulShutdown() {
+	serv.s.GracefulStop()
+}
