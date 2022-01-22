@@ -6,6 +6,7 @@ import (
 	"fibonacci_service/pkg/server/rest"
 	"fibonacci_service/pkg/server/rpc"
 	"fibonacci_service/pkg/service"
+	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
@@ -19,7 +20,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("invalid cache db number")
 	}
-
 	c, err := cache.Connect(
 		os.Getenv("CACHE_ADDRESS"),
 		os.Getenv("CACHE_PASSWORD"),
@@ -30,26 +30,27 @@ func main() {
 	}
 
 	svc := service.New(c)
-	restServ := rest.New(svc)
 
 	restPort, err := strconv.Atoi(os.Getenv("REST_PORT"))
 	if err != nil {
 		log.Fatalf("invalid rest port number")
 	}
-
+	restServ := rest.New(svc)
 	go func() {
-		log.Fatal(restServ.StartRest(restPort))
+		if err := restServ.StartRest(restPort); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("shutting down rest server: %s", err.Error())
+		}
 	}()
-
-	rpcServ := rpc.New(svc)
 
 	grpcPort, err := strconv.Atoi(os.Getenv("GRPC_PORT"))
 	if err != nil {
 		log.Fatalf("invalid grpc port number")
 	}
-
+	rpcServ := rpc.New(svc)
 	go func() {
-		log.Fatal(rpcServ.StartRpc(grpcPort))
+		if err := rpcServ.StartRpc(grpcPort); err != nil {
+			log.Fatalf("shutting down rpc server: %s", err.Error())
+		}
 	}()
 
 	//graceful shutdown
