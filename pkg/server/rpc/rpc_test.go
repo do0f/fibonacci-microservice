@@ -14,6 +14,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	grpc "google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func TestServer_GetFibonacci(t *testing.T) {
@@ -22,13 +23,13 @@ func TestServer_GetFibonacci(t *testing.T) {
 
 	mockService := fib_service_mock.NewMockFibService(mockCtrl)
 
-	mockService.EXPECT().FibSequence(1, 4).Return([]service.FibNumber{
+	mockService.EXPECT().FibSequence(gomock.Any(), 1, 4).Return([]service.FibNumber{
 		{Count: 1, Value: big.NewInt(1)},
 		{Count: 2, Value: big.NewInt(2)},
 		{Count: 3, Value: big.NewInt(3)},
 		{Count: 4, Value: big.NewInt(5)},
 	}, nil).Times(1)
-	mockService.EXPECT().FibSequence(6, 7).Return(nil, service.ErrCacheError).Times(1)
+	mockService.EXPECT().FibSequence(gomock.Any(), 6, 7).Return(nil, service.ErrCacheError).Times(1)
 
 	serv := server.New(mockService)
 
@@ -61,7 +62,7 @@ func TestServer_GetFibonacci(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			conn, err := grpc.Dial("localhost:9001", grpc.WithInsecure())
+			conn, err := grpc.Dial("localhost:9001", grpc.WithTransportCredentials(insecure.NewCredentials()))
 			if err != nil {
 				log.Fatalf("fail to dial: %v", err)
 			}

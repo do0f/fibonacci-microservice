@@ -7,6 +7,7 @@ import (
 )
 
 func (serv *Server) GetFibonacci(ctx context.Context, req *rpc.FibonacciSequenceRequest) (*rpc.FibonacciSequenceResponse, error) {
+
 	if req.First > req.Last {
 		return &rpc.FibonacciSequenceResponse{Number: nil, Error: server.ErrFirstLargerThanLast.Error()}, nil
 	}
@@ -14,7 +15,7 @@ func (serv *Server) GetFibonacci(ctx context.Context, req *rpc.FibonacciSequence
 		return &rpc.FibonacciSequenceResponse{Number: nil, Error: server.ErrNegativeCount.Error()}, nil
 	}
 
-	seq, err := serv.svc.FibSequence(int(req.First), int(req.Last))
+	seq, err := serv.svc.FibSequence(ctx, int(req.First), int(req.Last))
 	if err != nil {
 		return &rpc.FibonacciSequenceResponse{Number: nil, Error: err.Error()}, nil
 	}

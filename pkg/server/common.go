@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"errors"
 	"fibonacci_service/pkg/service"
 )
@@ -12,5 +13,5 @@ var (
 )
 
 type FibService interface {
-	FibSequence(first int, last int) ([]service.FibNumber, error)
+	FibSequence(ctx context.Context, first int, last int) ([]service.FibNumber, error)
 }

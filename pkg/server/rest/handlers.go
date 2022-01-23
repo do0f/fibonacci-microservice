@@ -1,11 +1,12 @@
 package rest
 
 import (
+	"context"
 	"fibonacci_service/pkg/server"
 	"math/big"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	echo "github.com/labstack/echo/v4"
 )
 
 type fibbonaciReqData struct {
@@ -35,8 +36,13 @@ func (serv *Server) GetFibonacciHandler(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, errorResponse{server.ErrNegativeCount.Error()})
 	}
 
-	sequence, err := serv.svc.FibSequence(reqData.First, reqData.Last)
+	sequence, err := serv.svc.FibSequence(ctx.Request().Context(), reqData.First, reqData.Last)
 	if err != nil {
+		if err == context.Canceled {
+			serv.e.Logger.Info(err)
+			return ctx.JSON(http.StatusBadRequest, errorResponse{err.Error()})
+		}
+
 		serv.e.Logger.Error(err)
 		return ctx.JSON(http.StatusInternalServerError, errorResponse{"interval error"})
 	}

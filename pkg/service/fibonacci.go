@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"fibonacci_service/pkg/cache"
 	"math/big"
@@ -13,8 +14,8 @@ var (
 )
 
 type Cache interface {
-	GetFibonacci(count int) (cache.FibNumber, error)
-	SetFibonacci(num cache.FibNumber) error
+	GetFibonacci(ctx context.Context, count int) (cache.FibNumber, error)
+	SetFibonacci(ctx context.Context, num cache.FibNumber) error
 }
 
 type FibService struct {
@@ -32,7 +33,13 @@ type FibNumber struct {
 	Value *big.Int
 }
 
-func (fs *FibService) getFib(count int) (FibNumber, error) {
+func (fs *FibService) getFib(ctx context.Context, count int) (FibNumber, error) {
+	select {
+	case <-ctx.Done():
+		return FibNumber{}, ctx.Err()
+	default:
+	}
+
 	if count < 0 {
 		return FibNumber{}, ErrNegativeCount
 	}
@@ -40,12 +47,15 @@ func (fs *FibService) getFib(count int) (FibNumber, error) {
 		return FibNumber{count, big.NewInt(1)}, nil
 	}
 
-	cachedNum, err := fs.c.GetFibonacci(count)
+	cachedNum, err := fs.c.GetFibonacci(ctx, count)
 	//number was in cache
 	if err == nil {
 		return FibNumber{cachedNum.Count, cachedNum.Value}, nil
 	}
-	//cache error
+	if err == context.Canceled {
+		return FibNumber{}, err
+	}
+	//return error only when it is internal
 	if err != cache.ErrKeyDoesntExist {
 		return FibNumber{}, ErrCacheError
 	}
@@ -54,7 +64,7 @@ func (fs *FibService) getFib(count int) (FibNumber, error) {
 	prev := [2]FibNumber{}
 	for i := 0; i < 2; i++ {
 		var err error
-		prev[i], err = fs.getFib(count - 1 - i)
+		prev[i], err = fs.getFib(ctx, count-1-i)
 
 		if err != nil {
 			return FibNumber{}, err
@@ -63,12 +73,18 @@ func (fs *FibService) getFib(count int) (FibNumber, error) {
 
 	fibNum := FibNumber{count, big.NewInt(0).Add(prev[0].Value, prev[1].Value)}
 	//cache new number
-	go fs.c.SetFibonacci(cache.FibNumber{Count: fibNum.Count, Value: fibNum.Value})
+	go fs.c.SetFibonacci(ctx, cache.FibNumber{Count: fibNum.Count, Value: fibNum.Value})
 
 	return fibNum, nil
 }
 
-func (fs *FibService) FibSequence(first int, last int) ([]FibNumber, error) {
+func (fs *FibService) FibSequence(ctx context.Context, first int, last int) ([]FibNumber, error) {
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+	}
+
 	if first > last {
 		return nil, ErrFirstLargerThanLast
 	}
@@ -76,7 +92,7 @@ func (fs *FibService) FibSequence(first int, last int) ([]FibNumber, error) {
 	sequence := make([]FibNumber, last-first+1)
 
 	for i := 0; i < last-first+1; i++ {
-		num, err := fs.getFib(first + i)
+		num, err := fs.getFib(ctx, first+i)
 		if err != nil {
 			return nil, err
 		}

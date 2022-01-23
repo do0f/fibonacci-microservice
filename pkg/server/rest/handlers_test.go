@@ -1,6 +1,7 @@
 package rest_test
 
 import (
+	"context"
 	fib_service_mock "fibonacci_service/pkg/server/mocks"
 	server "fibonacci_service/pkg/server/rest"
 	"fibonacci_service/pkg/service"
@@ -15,18 +16,20 @@ import (
 )
 
 func TestHandlers_GetFibonacciHandler(t *testing.T) {
+	ctx := context.Background()
+
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
 	mockService := fib_service_mock.NewMockFibService(mockCtrl)
 
-	mockService.EXPECT().FibSequence(1, 4).Return([]service.FibNumber{
+	mockService.EXPECT().FibSequence(ctx, 1, 4).Return([]service.FibNumber{
 		{Count: 1, Value: big.NewInt(1)},
 		{Count: 2, Value: big.NewInt(2)},
 		{Count: 3, Value: big.NewInt(3)},
 		{Count: 4, Value: big.NewInt(5)},
 	}, nil).Times(1)
-	mockService.EXPECT().FibSequence(6, 7).Return(nil, service.ErrCacheError).Times(1)
+	mockService.EXPECT().FibSequence(ctx, 6, 7).Return(nil, service.ErrCacheError).Times(1)
 
 	serv := server.New(mockService)
 	go serv.StartRest(1324)

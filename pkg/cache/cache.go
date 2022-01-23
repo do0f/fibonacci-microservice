@@ -44,8 +44,8 @@ func (c *Cache) GracefulShutdown() error {
 	return c.c.Close()
 }
 
-func (c *Cache) GetFibonacci(count int) (FibNumber, error) {
-	strVal, err := c.c.Get(context.Background(), strconv.Itoa(count)).Result()
+func (c *Cache) GetFibonacci(ctx context.Context, count int) (FibNumber, error) {
+	strVal, err := c.c.Get(ctx, strconv.Itoa(count)).Result()
 	if err != nil {
 		if err == redis.Nil {
 			return FibNumber{}, ErrKeyDoesntExist
@@ -63,8 +63,8 @@ func (c *Cache) GetFibonacci(count int) (FibNumber, error) {
 	return FibNumber{count, val}, nil
 }
 
-func (c *Cache) SetFibonacci(num FibNumber) error {
-	err := c.c.Set(context.Background(), strconv.Itoa(num.Count),
+func (c *Cache) SetFibonacci(ctx context.Context, num FibNumber) error {
+	err := c.c.Set(ctx, strconv.Itoa(num.Count),
 		num.Value.String(), 0).Err()
 
 	return err

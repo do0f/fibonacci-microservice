@@ -1,6 +1,7 @@
 package service_test
 
 import (
+	"context"
 	"math/big"
 	"testing"
 
@@ -13,18 +14,20 @@ import (
 )
 
 func TestFibService_FibSequence(t *testing.T) {
+	ctx := context.Background()
+
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
 	mockCache := mock_cache.NewMockCache(mockCtrl)
 	//cache miss for any value except two for error checking case
-	mockCache.EXPECT().GetFibonacci(gomock.All(gomock.Any(), gomock.Not(6), gomock.Not(7))).Return(cache.FibNumber{}, cache.ErrKeyDoesntExist).AnyTimes()
+	mockCache.EXPECT().GetFibonacci(ctx, gomock.All(gomock.Any(), gomock.Not(6), gomock.Not(7))).Return(cache.FibNumber{}, cache.ErrKeyDoesntExist).AnyTimes()
 	//cache hit for count 6
-	mockCache.EXPECT().GetFibonacci(6).Return(cache.FibNumber{Count: 6, Value: big.NewInt(13)}, nil).AnyTimes()
+	mockCache.EXPECT().GetFibonacci(ctx, 6).Return(cache.FibNumber{Count: 6, Value: big.NewInt(13)}, nil).AnyTimes()
 	//cache error for count 7
-	mockCache.EXPECT().GetFibonacci(7).Return(cache.FibNumber{}, cache.ErrParsingValue).AnyTimes()
+	mockCache.EXPECT().GetFibonacci(ctx, 7).Return(cache.FibNumber{}, cache.ErrParsingValue).AnyTimes()
 	//pretend to cache
-	mockCache.EXPECT().SetFibonacci(gomock.Any()).Return(nil).AnyTimes()
+	mockCache.EXPECT().SetFibonacci(ctx, gomock.Any()).Return(nil).AnyTimes()
 
 	svc := service.New(mockCache)
 
@@ -69,7 +72,7 @@ func TestFibService_FibSequence(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			seq, err := svc.FibSequence(test.testInput.first, test.testInput.last)
+			seq, err := svc.FibSequence(ctx, test.testInput.first, test.testInput.last)
 
 			assert.Equal(t, test.expected.err, err)
 			assert.Equal(t, len(test.expected.sequence), len(seq))

@@ -60,12 +60,6 @@ func main() {
 
 	log.Printf("attempting graceful shutdown")
 
-	err = c.GracefulShutdown()
-	if err != nil {
-		log.Printf("failed to gracefully shutdown redis cache: %s", err.Error())
-	}
-	log.Printf("cache shutted down")
-
 	rpcServ.GracefulShutdown()
 	log.Printf("rpc server shutted down")
 
@@ -74,4 +68,10 @@ func main() {
 		log.Printf("failed to gracefully shutdown rest server: %s", err.Error())
 	}
 	log.Printf("rest server shutted down")
+
+	err = c.GracefulShutdown()
+	if err != nil {
+		log.Printf("failed to gracefully shutdown redis cache: %s", err.Error())
+	}
+	log.Printf("cache shutted down")
 }

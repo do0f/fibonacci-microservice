@@ -5,6 +5,7 @@
 package cache_mock
 
 import (
+	context "context"
 	cache "fibonacci_service/pkg/cache"
 	reflect "reflect"
 
@@ -35,30 +36,30 @@ func (m *MockCache) EXPECT() *MockCacheMockRecorder {
 }
 
 // GetFibonacci mocks base method.
-func (m *MockCache) GetFibonacci(count int) (cache.FibNumber, error) {
+func (m *MockCache) GetFibonacci(ctx context.Context, count int) (cache.FibNumber, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetFibonacci", count)
+	ret := m.ctrl.Call(m, "GetFibonacci", ctx, count)
 	ret0, _ := ret[0].(cache.FibNumber)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetFibonacci indicates an expected call of GetFibonacci.
-func (mr *MockCacheMockRecorder) GetFibonacci(count interface{}) *gomock.Call {
+func (mr *MockCacheMockRecorder) GetFibonacci(ctx, count interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFibonacci", reflect.TypeOf((*MockCache)(nil).GetFibonacci), count)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFibonacci", reflect.TypeOf((*MockCache)(nil).GetFibonacci), ctx, count)
 }
 
 // SetFibonacci mocks base method.
-func (m *MockCache) SetFibonacci(num cache.FibNumber) error {
+func (m *MockCache) SetFibonacci(ctx context.Context, num cache.FibNumber) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetFibonacci", num)
+	ret := m.ctrl.Call(m, "SetFibonacci", ctx, num)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // SetFibonacci indicates an expected call of SetFibonacci.
-func (mr *MockCacheMockRecorder) SetFibonacci(num interface{}) *gomock.Call {
+func (mr *MockCacheMockRecorder) SetFibonacci(ctx, num interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetFibonacci", reflect.TypeOf((*MockCache)(nil).SetFibonacci), num)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetFibonacci", reflect.TypeOf((*MockCache)(nil).SetFibonacci), ctx, num)
 }
